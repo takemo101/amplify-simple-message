@@ -1,4 +1,4 @@
-import type { AppSyncResolverEvent, AppSyncResolverHandler } from 'aws-lambda';
+import type { AppSyncResolverHandler } from 'aws-lambda';
 import { createMessage } from './handlers/createMessage';
 import { getMessages } from './handlers/getMessages';
 import { removeMessage } from './handlers/removeMessage';
@@ -24,15 +24,13 @@ const isValidFieldName = (
 
 type HandlerArguments = (typeof handlers)[keyof typeof handlers];
 type HandlerResult = Awaited<ReturnType<HandlerArguments>>;
+type HandlerEvent = Parameters<(typeof handlers)[keyof typeof handlers]>[0];
 
 type Handler = AppSyncResolverHandler<HandlerArguments, HandlerResult>;
 
 export const handler: Handler = async (event, context, callback) => {
   // なぜか型と違うオブジェクトが渡ってくるので、型アサーションする
-  const assertedEvent = event as AppSyncResolverEvent<
-    HandlerArguments,
-    Record<string, unknown>
-  > & {
+  const assertedEvent = event as HandlerEvent & {
     fieldName: string;
   };
 
@@ -46,7 +44,7 @@ export const handler: Handler = async (event, context, callback) => {
   const handler = handlers[fieldName];
 
   return await handler(
-    // @ts-ignore 型がうまくいかなかったので回避
+    // @ts-ignore
     event,
     context,
     callback,
