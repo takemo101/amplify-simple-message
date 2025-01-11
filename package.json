@@ -1,0 +1,43 @@
+{
+  "name": "amplify-message",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:check": "biome lint ./",
+    "format:check": "biome format ./",
+    "lint:fix": "biome format --write ./ && biome lint ./",
+    "fix": "biome check --write --unsafe ./ && biome lint ./"
+  },
+  "dependencies": {
+    "@aws-amplify/adapter-nextjs": "^1.4.0",
+    "@aws-amplify/api": "^6.2.0",
+    "@aws-amplify/data-schema": "^1.17.2",
+    "@aws-amplify/ui-react": "^6.8.1",
+    "aws-amplify": "^6.12.0",
+    "next": "15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.13.0",
+    "@aws-amplify/backend-cli": "^1.4.6",
+    "@aws-sdk/types": "^3.723.0",
+    "@biomejs/biome": "1.9.4",
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "aws-cdk": "^2.175.1",
+    "aws-cdk-lib": "^2.175.1",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.2",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}
