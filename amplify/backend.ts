@@ -107,7 +107,7 @@ messageLambda.resources.lambda.addToRolePolicy(
     effect: iam.Effect.ALLOW,
     actions: [
       'ec2:CreateNetworkInterface',
-      // 必要に応じて他の操作も追加するが、以下は多分必要ない
+      // 必要に応じて他の操作も追加するが、以下は多分必要ない（念のために追加）
       'ec2:DescribeNetworkInterfaces',
       'ec2:DeleteNetworkInterface',
       'ec2:AssignPrivateIpAddresses',
