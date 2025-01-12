@@ -17,15 +17,21 @@ const vpc = new ec2.Vpc(redisStack, 'Vpc', {
   maxAzs: 2, // 2つのアベイラビリティゾーンを使用
   subnetConfiguration: [
     {
-      subnetType: ec2.SubnetType.PUBLIC,
-      name: 'Public',
-      cidrMask: 24,
-    },
-    {
-      subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      subnetType: ec2.SubnetType.PRIVATE_ISOLATED, // NATゲートウェイなしのプライベートサブネット
       name: 'Private',
       cidrMask: 24,
     },
+    // public と private のサブネットを追加する場合は以下のように追加する
+    // {
+    //   subnetType: ec2.SubnetType.PUBLIC,
+    //   name: 'Public',
+    //   cidrMask: 24,
+    // },
+    // {
+    //   subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+    //   name: 'Private',
+    //   cidrMask: 24,
+    // },
   ],
 });
 
