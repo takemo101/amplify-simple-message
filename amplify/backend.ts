@@ -15,6 +15,7 @@ const redisStack = backend.createStack('RedisStack');
 // VPCの作成
 const vpc = new ec2.Vpc(redisStack, 'Vpc', {
   maxAzs: 2, // 2つのアベイラビリティゾーンを使用
+  ipAddresses: ec2.IpAddresses.cidr('10.1.0.0/16'), // CIDRブロックを指定
   subnetConfiguration: [
     {
       subnetType: ec2.SubnetType.PRIVATE_ISOLATED, // NATゲートウェイなしのプライベートサブネット
@@ -62,12 +63,17 @@ redisSecurityGroup.addIngressRule(
   'Allow traffic from Lambda',
 );
 
+// NATゲートウェイなしのprivateサブネットを取得
+const privateSubnetIds = vpc.isolatedSubnets.map((subnet) => subnet.subnetId);
+// NATゲートウェイありのprivate のサブネットを追加する場合は以下のように追加する
+// const privateSubnetIds = vpc.privateSubnets.map((subnet) => subnet.subnetId);
+
 const redisSubnetGroup = new elasticache.CfnSubnetGroup(
   redisStack,
   'RedisSubnetGroup',
   {
     description: 'Subnet group for Redis',
-    subnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+    subnetIds: privateSubnetIds,
   },
 );
 
@@ -99,15 +105,6 @@ messageLambda.addEnvironment(
 );
 messageLambda.addEnvironment('REDIS_PORT', redisCluster.attrRedisEndpointPort);
 
-// LambdaにVPC設定を追加
-messageLambda.resources.cfnResources.cfnFunction.addPropertyOverride(
-  'VpcConfig',
-  {
-    SubnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
-    SecurityGroupIds: [lambdaSecurityGroup.securityGroupId],
-  },
-);
-
 // LambdaにEC2の操作権限を追加
 messageLambda.resources.lambda.addToRolePolicy(
   new iam.PolicyStatement({
@@ -122,4 +119,13 @@ messageLambda.resources.lambda.addToRolePolicy(
     ],
     resources: ['*'], // 必要に応じてリソースを限定する
   }),
+);
+
+// LambdaにVPC設定を追加
+messageLambda.resources.cfnResources.cfnFunction.addPropertyOverride(
+  'VpcConfig',
+  {
+    SubnetIds: privateSubnetIds,
+    SecurityGroupIds: [lambdaSecurityGroup.securityGroupId],
+  },
 );
