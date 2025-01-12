@@ -6,7 +6,7 @@ type Handler = Schema['removeMessage']['functionHandler'];
 export const removeMessage: Handler = async (event) => {
   const id = event.arguments.id;
 
-  const removedMessage = remove(id);
+  const removedMessage = await remove(id);
 
   return {
     operation: 'remove',

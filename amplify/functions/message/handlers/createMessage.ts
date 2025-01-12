@@ -6,7 +6,7 @@ type Handler = Schema['createMessage']['functionHandler'];
 export const createMessage: Handler = async (event) => {
   const message = event.arguments;
 
-  const createdMessage = create(message);
+  const createdMessage = await create(message);
 
   return {
     operation: 'create',

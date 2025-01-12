@@ -1,23 +1,29 @@
+import Redis from 'ioredis';
 import type { Schema } from '../../../data/resource';
+
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: Number(process.env.REDIS_PORT),
+});
 
 type MessageEntity = Schema['Message']['type'];
 
-const messages: MessageEntity[] = [
-  {
-    id: 1,
-    message: 'こんにちわ！',
-  },
-  {
-    id: 2,
-    message: 'さようなら！',
-  },
-];
+const getList = async () => {
+  console.log(process.env);
 
-const getList = (): MessageEntity[] => {
-  return messages;
+  try {
+    const messages = await redis.lrange('messages', 0, -1);
+    return messages.map((m) => JSON.parse(m) as MessageEntity);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return [];
 };
 
-const create = (message: Omit<MessageEntity, 'id'>): MessageEntity => {
+const create = async (message: Omit<MessageEntity, 'id'>) => {
+  const messages = await getList();
+
   const maxId = messages.reduce((max, m) => (m.id > max ? m.id : max), 0);
 
   const createdMessage = {
@@ -25,18 +31,21 @@ const create = (message: Omit<MessageEntity, 'id'>): MessageEntity => {
     ...message,
   };
 
-  messages.push(createdMessage);
+  await redis.rpush('messages', JSON.stringify(createdMessage));
 
   return createdMessage;
 };
 
-const remove = (id: number): MessageEntity => {
-  const index = messages.findIndex((m) => m.id === id);
-  if (index === -1) {
-    throw new Error(`Message not found: ${id}`);
+const remove = async (id: number) => {
+  const messages = await getList();
+
+  const removedMessage = messages.find((m) => m.id === id);
+
+  if (!removedMessage) {
+    throw new Error('Message not found');
   }
 
-  const [removedMessage] = messages.splice(index, 1);
+  await redis.lrem('messages', 0, JSON.stringify(removedMessage));
 
   return removedMessage;
 };
