@@ -83,16 +83,8 @@ const redisCluster = new elasticache.CfnCacheCluster(
 redisCluster.node.addDependency(redisSubnetGroup);
 redisCluster.node.addDependency(redisSecurityGroup);
 
-// LambdaにVPC設定を追加
+// backend から Lambda のリソースを取得
 const messageLambda = backend.message;
-
-messageLambda.resources.cfnResources.cfnFunction.addPropertyOverride(
-  'VpcConfig',
-  {
-    SubnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
-    SecurityGroupIds: [lambdaSecurityGroup.securityGroupId],
-  },
-);
 
 // Lambdaの環境変数にRedisのエンドポイント情報を追加
 messageLambda.addEnvironment(
@@ -100,6 +92,15 @@ messageLambda.addEnvironment(
   redisCluster.attrRedisEndpointAddress,
 );
 messageLambda.addEnvironment('REDIS_PORT', redisCluster.attrRedisEndpointPort);
+
+// LambdaにVPC設定を追加
+messageLambda.resources.cfnResources.cfnFunction.addPropertyOverride(
+  'VpcConfig',
+  {
+    SubnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+    SecurityGroupIds: [lambdaSecurityGroup.securityGroupId],
+  },
+);
 
 // LambdaにEC2の操作権限を追加
 messageLambda.resources.lambda.addToRolePolicy(
