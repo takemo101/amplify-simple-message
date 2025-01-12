@@ -122,6 +122,7 @@ messageLambda.resources.lambda.addToRolePolicy(
 );
 
 // LambdaにVPC設定を追加
+// addPropertyOverride で VpcConfig を上書きする
 messageLambda.resources.cfnResources.cfnFunction.addPropertyOverride(
   'VpcConfig',
   {
