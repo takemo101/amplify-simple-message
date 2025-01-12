@@ -9,8 +9,6 @@ const redis = new Redis({
 type MessageEntity = Schema['Message']['type'];
 
 const getList = async () => {
-  console.log(process.env);
-
   try {
     const messages = await redis.lrange('messages', 0, -1);
     return messages.map((m) => JSON.parse(m) as MessageEntity);
